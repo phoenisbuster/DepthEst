@@ -1,88 +1,125 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.UI;
+using TMPro;
+using UnityEngine.UI;
 
 public class TestNativeCamera : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public RawImage rawimage;
+    public Button recordBtn;
+    public Button captureBtn;
+    public Button changeCamera;
+    public Button changeImgRotate;
+    public int DefaultCameraIndex = 0;
 
-    void Update()
+    public void clickRecord()
     {
-        if( Input.GetMouseButtonDown( 0 ) )
+        if(checkCameraBusy())
         {
-            // Don't attempt to use the camera if it is already open
-            if( NativeCamera.IsCameraBusy() )
-                return;
-                
-            if( Input.mousePosition.x < Screen.width / 2 )
-            {
-                // Take a picture with the camera
-                // If the captured image's width and/or height is greater than 512px, down-scale it
-                TakePicture( 1080 );
-            }
-            else
-            {
-                // Record a video with the camera
-                RecordVideo();
-            }
+            return;
         }
+        RecordVideo();
     }
 
-    private void TakePicture( int maxSize )
+    public void clickCapture()
     {
-        NativeCamera.Permission permission = NativeCamera.TakePicture( ( path ) =>
+        if(checkCameraBusy())
         {
-            Debug.Log( "Image path: " + path );
+            return;
+        }
+        TakePicture(480);
+    } 
+
+    public void changeCameraIndex()
+    {
+        DefaultCameraIndex = DefaultCameraIndex == 0? 1 : 0;
+    }
+
+    public void changeImageRotate()
+    {
+        Debug.Log(rawimage.transform.eulerAngles.z);
+        var newZ = 0;
+        if(rawimage.transform.eulerAngles.z == newZ)
+        {
+            newZ = -90;
+        }
+        rawimage.transform.eulerAngles = new Vector3(0, 0, newZ);
+    }
+
+    private bool checkCameraBusy()
+    {
+        return NativeCamera.IsCameraBusy();
+    }
+
+    private void TakePicture(int maxSize)
+    {
+        NativeCamera.Permission permission = NativeCamera.TakePicture(( path) =>
+        {
+            DebugLog.getInstance().updateLog(LogType.NativeCamera, "NativeCam Start: " + path, false);
             if( path != null )
             {
                 // Create a Texture2D from the captured image
                 Texture2D texture = NativeCamera.LoadImageAtPath( path, maxSize );
-                if( texture == null )
+                if(texture == null)
                 {
-                    Debug.Log( "Couldn't load texture from " + path );
+                    DebugLog.getInstance().updateLog(LogType.NativeCamera, "Couldn't load texture: " + path, false);
                     return;
                 }
 
-                // Assign texture to a temporary quad and destroy it after 5 seconds
-                GameObject quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
-                quad.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 2.5f;
-                quad.transform.forward = Camera.main.transform.forward;
-                quad.transform.localScale = new Vector3( 1f, texture.height / (float) texture.width, 1f );
-                
-                Material material = quad.GetComponent<Renderer>().material;
-                if( !material.shader.isSupported ) // happens when Standard shader is not included in the build
-                    material.shader = Shader.Find( "Legacy Shaders/Diffuse" );
-
-                material.mainTexture = texture;
-                    
-                Destroy( quad, 5f );
+                // Asign texture to the RawImage in the Scene
+                rawimage.texture = texture;
 
                 // If a procedural texture is not destroyed manually, 
                 // it will only be freed after a scene change
-                Destroy( texture, 5f );
+                // Save to gallery before Destroy
+                StartCoroutine(SaveImage(texture));
+                //Destroy(texture, 5f );
             }
         }, maxSize );
 
-        Debug.Log( "Permission result: " + permission );
+        DebugLog.getInstance().updateLog(LogType.NativeCamera, "NativeCam End with: " + permission);
     }
 
     private void RecordVideo()
     {
         NativeCamera.Permission permission = NativeCamera.RecordVideo( ( path ) =>
         {
-            Debug.Log( "Video path: " + path );
+            DebugLog.getInstance().updateLog(LogType.NativeCamera, "NativeVideo Start: file://" + path, false);
             if( path != null )
             {
                 // Play the recorded video
-                Handheld.PlayFullScreenMovie( "file://" + path );
+                Handheld.PlayFullScreenMovie("file://" + path);
             }
         } );
 
-        Debug.Log( "Permission result: " + permission );
+        DebugLog.getInstance().updateLog(LogType.NativeCamera, "NativeVideo End with: " + permission);
+    }
+
+    private IEnumerator SaveImage(Texture2D texture)
+    {
+        Texture2D textureInstance = new Texture2D(rawimage.texture.width, rawimage.texture.height, TextureFormat.ARGB32, false);
+        textureInstance = texture;
+
+        yield return new WaitForEndOfFrame();
+
+        NativeGallery.Permission permission = NativeGallery.SaveImageToGallery(
+                                                                    textureInstance, 
+                                                                    "CameraTest", 
+                                                                    "CaptureImage.png", 
+                                                                    (success, path) => 
+                                                                    {
+                                                                        Debug.Log(path);
+                                                                        Debug.Log(path == "");
+                                                                        DebugLog.getInstance().updateLog(
+                                                                                                LogType.NativeGallery,
+                                                                                                "Save Image To Gallery: " + 
+                                                                                                success + " at " +
+                                                                                                path 
+                                                                        );
+                                                                    }
+        );
+        //SaveToResources.Save(textureInstance.EncodeToPNG(), "TestNativeCam", "png");
+        Destroy(texture);
     }
 }
