@@ -13,7 +13,7 @@ public class SaveToResources
         {
             Directory.CreateDirectory(dirPath);
         }
-        
+        Debug.Log(dirPath);
         File.WriteAllBytes(dirPath + "/" + FileCounter + "." + FileType, Content);
         FileCounter++;
     }
