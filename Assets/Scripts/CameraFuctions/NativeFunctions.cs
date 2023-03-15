@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class TestNativeCamera : MonoBehaviour
+public class NativeFunctions : MonoBehaviour
 {
     public RawImage rawimage;
     public Button recordBtn;
@@ -12,6 +12,18 @@ public class TestNativeCamera : MonoBehaviour
     public Button changeCamera;
     public Button changeImgRotate;
     public int DefaultCameraIndex = 0;
+
+    private static NativeFunctions instance;
+
+    private void Awake() 
+    {
+        instance = this;
+    }
+
+    public static NativeFunctions getInstance()
+    {
+        return instance;
+    }
 
     public void clickRecord()
     {
@@ -28,7 +40,7 @@ public class TestNativeCamera : MonoBehaviour
         {
             return;
         }
-        TakePicture(480);
+        TakePicture(1024);
     } 
 
     public void changeCameraIndex()
@@ -69,7 +81,7 @@ public class TestNativeCamera : MonoBehaviour
 
                 // Asign texture to the RawImage in the Scene
                 rawimage.texture = texture;
-
+                rawimage.material.mainTexture = texture;
                 // If a procedural texture is not destroyed manually, 
                 // it will only be freed after a scene change
                 // Save to gallery before Destroy
