@@ -38,7 +38,7 @@ public class UIManager : MonoBehaviour
     {
         if(firstInit)
         {
-            BuiltInCameraFunctions.getInstance().clickAccessCamera();
+            //BuiltInCameraFunctions.getInstance().clickAccessCamera();
         }
         firstInit = false;
 

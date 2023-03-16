@@ -44,7 +44,7 @@ public class SettingPanel : MonoBehaviour
     private void Start() 
     {
         OnResolutionChange();
-        WSConnection.getInstance().changeAddress(savedAddress);
+        Title_Address.text = "WS Address: " + WSConnection.getInstance().changeAddress(savedAddress);
     }
 
     public void OnResolutionChange()
@@ -67,13 +67,21 @@ public class SettingPanel : MonoBehaviour
 
     public void OnInputAddressFinish()
     {
+        if(AddressInput.text == "")
+        {
+            return;
+        }
         currentAddress = AddressInput.text;
     }
 
     public void OnClickSaveAddress()
     {
+        if(AddressInput.text == "")
+        {
+            return;
+        }
         savedAddress = currentAddress;
         UserData.SaveServerAddress(savedAddress);
-        WSConnection.getInstance().changeAddress(savedAddress, true);
+        Title_Address.text = "WS Address: " + WSConnection.getInstance().changeAddress(savedAddress, true);
     }
 }

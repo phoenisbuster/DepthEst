@@ -42,7 +42,8 @@ public class BuiltInCameraFunctions : MonoBehaviour
 
     public void clickAccessCamera()
     {
-        accessCamera();
+        if(webcamTexture != null && !webcamTexture.isPlaying)
+            accessCamera();
     }
 
     public void clickCapture()
@@ -115,6 +116,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
 
         //Set the webcamTexture to the texture of the rawimage
         ImageScript.showTexture();
+        ImageScript.ToggleHover(false);
         ImageScript.setTexture(webcamTexture);
         
         //Start the camera
@@ -134,6 +136,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
         texture.Apply();
 
         webcamTexture.Stop();
+        ImageScript.ToggleHover(true);
 
         Debug.Log("CHECK texture isReadable " + texture.isReadable);
         Debug.Log("CHECK rawimage isReadable " + rawimage.texture.isReadable);
@@ -160,6 +163,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
                                                                     }
         );
         SaveToResources.Save(texture.EncodeToPNG(), "TestWebCamText", "png");
+        WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
         // To avoid memory leaks
         Destroy(texture);
     }

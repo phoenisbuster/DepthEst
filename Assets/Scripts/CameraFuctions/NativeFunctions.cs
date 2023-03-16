@@ -73,6 +73,7 @@ public class NativeFunctions : MonoBehaviour
 
                 // Asign texture to the RawImage in the Scene
                 ImageScript.showTexture();
+                ImageScript.ToggleHover(true);
                 rawimage.texture = texture;
 
                 // If a procedural texture is not destroyed manually, 
@@ -124,8 +125,7 @@ public class NativeFunctions : MonoBehaviour
                                                                         );
                                                                     }
         );
-        //SaveToResources.Save(textureInstance.EncodeToPNG(), "TestNativeCam", "png");
-        //Destroy(texture);
+        WSConnection.getInstance().setTextureData(textureInstance.EncodeToPNG());
     }
 
     private void PickImage( int maxSize )
@@ -145,8 +145,10 @@ public class NativeFunctions : MonoBehaviour
 
                 // Asign texture to the RawImage in the Scene
                 ImageScript.showTexture();
+                ImageScript.ToggleHover(true);
                 rawimage.texture = texture;
                 
+                WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
                 //Destroy( texture, 5f );
             }
         } );

@@ -115,9 +115,9 @@ public class PanelDown : MonoBehaviour
         switch(FeatureOptionsScript.currentFeatureType)
         {
             case FeatureList.BuiltInPhoto:
-                Debug.Log("CHECK");
                 BuiltInCameraFunctions.getInstance().clickAccessCamera();
                 ShowEditMode(false);
+                WSConnection.getInstance().setTargetPos();
                 break;
             
             case FeatureList.RealtimeRender:
@@ -127,11 +127,13 @@ public class PanelDown : MonoBehaviour
             case FeatureList.NativePhoto:
                 BuiltInCameraFunctions.getInstance().ImageScript.hideTexture();
                 ShowEditMode(false);
+                WSConnection.getInstance().setTargetPos();
                 break;
 
             case FeatureList.NativeRecord:
                 BuiltInCameraFunctions.getInstance().ImageScript.hideTexture();
                 ShowEditMode(false);
+                WSConnection.getInstance().setTargetPos();
                 break;
         }
     }
