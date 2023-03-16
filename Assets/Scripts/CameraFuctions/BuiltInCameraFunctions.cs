@@ -4,24 +4,33 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class TestWebCamText : MonoBehaviour
+public class BuiltInCameraFunctions : MonoBehaviour
 {
     public RawImage rawimage;
-    public Button initBtn;
-    public Button captureBtn;
-    public Button changeCamera;
-    public Button changeImgRotate;
+    public ImageLoader ImageScript;
     public int DefaultCameraIndex = 0;
     public bool initWhenStart = false;
     private WebCamTexture webcamTexture;
 
+    private static BuiltInCameraFunctions instance;
+
+    private void Awake() 
+    {
+        instance = this;
+    }
+
+    public static BuiltInCameraFunctions getInstance()
+    {
+        return instance;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        rawimage = ImageScript.rawimage;        
         if(initWhenStart)
         {
             initCamera();
-            initBtn.interactable = false;
         }
     }
 
@@ -44,13 +53,25 @@ public class TestWebCamText : MonoBehaviour
 
     public void changeImageRotate()
     {
-        Debug.Log(rawimage.transform.eulerAngles.z);
-        var newZ = 0;
-        if(rawimage.transform.eulerAngles.z == newZ)
+        ImageScript.RotateImage();
+    }
+
+    public void StopWebCamTex()
+    {
+        if(webcamTexture.isPlaying)
         {
-            newZ = -90;
+            webcamTexture.Stop();
+            rawimage.color = Color.black;
         }
-        rawimage.transform.eulerAngles = new Vector3(0, 0, newZ);
+    }
+
+    public void PlayWebCamTex()
+    {
+        if(!webcamTexture.isPlaying)
+        {
+            webcamTexture.Play();
+            rawimage.color = Color.white;
+        }
     }
 
     private void initCamera()
@@ -62,8 +83,10 @@ public class TestWebCamText : MonoBehaviour
         //Set a camera to the webcamTexture
         webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 480, 480, 30);
         //Set the webcamTexture to the texture of the rawimage
+        rawimage.color = Color.white;
         rawimage.texture = webcamTexture;
-        rawimage.material.mainTexture = webcamTexture;
+        //rawimage.material.mainTexture = webcamTexture;
+        
         //Start the camera
         webcamTexture.Play();
 
