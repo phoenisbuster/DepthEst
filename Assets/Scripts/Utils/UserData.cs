@@ -42,3 +42,31 @@ public class UserData
         PlayerPrefs.DeleteAll();
     }
 }
+
+class SendData
+{
+    public byte[] ImageData;
+    public float ImageWidth;
+    public float ImageHeight;
+    public float PosX;
+    public float PosY;
+    public SendData(byte[] _ImageData, float _ImageWidth, float _ImageHeight, float _PosX, float _PosY)
+    {
+        ImageData = _ImageData;
+        ImageWidth = _ImageWidth;
+        ImageHeight = _ImageHeight;
+        PosX = _PosX;
+        PosY = _PosY;
+    }
+}
+
+class ReceiveData
+{
+    public byte[] ImageData;
+    public float depth;
+    public ReceiveData(byte[] _ImageData, float _depth)
+    {
+        ImageData = _ImageData;
+        depth = _depth;
+    }
+}

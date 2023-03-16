@@ -9,8 +9,12 @@ public class WSConnection : MonoBehaviour
 {
     public string url = "ws://";
     public string address = "localhost:8080";
-    private WebSocket websocket;
+    public ImageLoader ImageScript;
+    public Texture2D currentTexture;
+    public Vector2 currentTargetPos;
 
+    private WebSocket websocket;   
+    private byte[] ImageData = new byte[0]; 
     private static WSConnection instance;
 
     private void Awake() 
@@ -30,7 +34,12 @@ public class WSConnection : MonoBehaviour
 
     void Start()
     {
-        
+        OpenWS();
+    }
+
+    public string getFullAddress()
+    {
+        return url+address;
     }
 
     public IEnumerator ConnectWS()
@@ -39,15 +48,19 @@ public class WSConnection : MonoBehaviour
         OpenWS();
     }
 
-    public void changeAddress(string value, bool reconnect = false)
+    public string changeAddress(string value, bool reconnect = false)
     {
-        address = value;
-        if(websocket != null)
-            CloseWS();
-        if(reconnect)
+        if(value != "" && value != address)
         {
-            StartCoroutine(ConnectWS());
+            address = value;
+            if(websocket != null)
+                CloseWS();
+            if(reconnect)
+            {
+                StartCoroutine(ConnectWS());
+            }
         }
+        return getFullAddress();
     }
 
     public void DisconnectWS()
@@ -56,11 +69,33 @@ public class WSConnection : MonoBehaviour
             CloseWS();
     }
 
+    public void setTextureData(byte[] _ImageData)
+    {
+        Debug.Log(_ImageData == ImageData);
+        Debug.Log(_ImageData.Length == ImageData.Length);
+        ImageData = _ImageData;    
+    }
+
+    public void setTargetPos()
+    {
+        currentTargetPos = ImageScript.getHoverPositionInPixel();
+    }
+
+    public void getData()
+    {
+        Debug.Log(ImageData.Length);
+        
+        var values = new SendData(ImageData, ImageScript.ImageWidth, ImageScript.ImageHeight, currentTargetPos.x, currentTargetPos.y);
+
+        var JsonValue = JsonUtility.ToJson(values);
+        Debug.Log(JsonValue);
+    }
+
     private async void OpenWS()
     {
         DebugLog.getInstance().updateLog(LogType.DefaultLog, url+address, false);
         
-        websocket = new WebSocket(url+address);
+        websocket = new WebSocket(getFullAddress());
 
         websocket.OnOpen += () =>
         {
@@ -100,6 +135,11 @@ public class WSConnection : MonoBehaviour
             if(websocket != null)
                 websocket.DispatchMessageQueue();
         #endif
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            getData();
+        }
     }
 
     async void SendWebSocketMessage()

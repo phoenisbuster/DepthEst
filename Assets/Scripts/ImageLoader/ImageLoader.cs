@@ -7,15 +7,24 @@ using UnityEngine.UI;
 public class ImageLoader : MonoBehaviour
 {
     public RawImage rawimage;
+    public Image squareHover;
     public float ImageWidth;
     public float ImageHeight;
+    public float HoverWidth;
+    public float HoverHeight;
+
+    private HoverController HoverScript;
+    private float minX;
+    private float maxX;
+    private float minY;
+    private float maxY;
 
     //private static ImageLoader instance;
     
     // Start is called before the first frame update
     void Awake() 
     {
-        //instance = this;
+        HoverScript = squareHover.GetComponent<HoverController>();
     }
 
     void Start()
@@ -23,11 +32,45 @@ public class ImageLoader : MonoBehaviour
         rawimage.color = Color.black;
     }
 
+    public void calculateHoverParam()
+    {
+        maxX = ImageWidth/2 - HoverWidth/2;
+        minX = -maxX;
+        maxY = ImageHeight/2 - HoverHeight/2;
+        minY = -maxY;
+
+        HoverScript.setHoverParam(ImageWidth, 0, ImageHeight, 0);  
+    }
+
+    public void ToggleHover(bool isOn)
+    {
+        squareHover.gameObject.SetActive(isOn);
+    }
+
+    public void ToggleHoverMovemnt(bool isOn)
+    {
+        HoverScript.setAllowMovement(isOn);
+    }
+
+    public Vector2 getHoverPosition()
+    {
+        Debug.Log(squareHover.transform.localPosition);
+        return squareHover.transform.localPosition;
+    }
+
+    public Vector2 getHoverPositionInPixel()
+    {
+        Debug.Log(squareHover.transform.GetComponent<RectTransform>().anchoredPosition);
+        return squareHover.transform.GetComponent<RectTransform>().anchoredPosition;
+    }
+
     public void changeImageSize(float width, float height)
     {
-        ImageWidth = width;
-        ImageHeight = height;
+        ImageWidth = height;
+        ImageHeight = width;
         rawimage.rectTransform.sizeDelta = new Vector2(ImageWidth, ImageHeight);
+
+        calculateHoverParam();
     }
 
     public void changeColor(Color value)
@@ -38,16 +81,6 @@ public class ImageLoader : MonoBehaviour
     public void setTexture(WebCamTexture value)
     {
         rawimage.texture = value;
-    }
-
-    public void setMaterial(Material value)
-    {
-        rawimage.material = value;
-    }
-
-    public void setMaterialTexture(Texture2D value)
-    {
-        rawimage.material.mainTexture = value;
     }
 
     public void removeTexture()
