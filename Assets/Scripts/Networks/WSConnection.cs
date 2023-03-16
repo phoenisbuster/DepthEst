@@ -121,6 +121,7 @@ public class WSConnection : MonoBehaviour
 
     private async void OnApplicationQuit()
     {
-        await websocket.Close();
+        if(websocket != null)
+            await websocket.Close();
     } 
 }
