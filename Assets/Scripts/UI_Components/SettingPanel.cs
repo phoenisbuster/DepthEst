@@ -37,7 +37,6 @@ public class SettingPanel : MonoBehaviour
         {
             AddressInput.text = currentAddress;
             savedAddress = currentAddress;
-            WSConnection.getInstance().changeAddress(savedAddress);
         }
         ResolutionOption.value = currentOption;
     }
@@ -45,6 +44,7 @@ public class SettingPanel : MonoBehaviour
     private void Start() 
     {
         OnResolutionChange();
+        WSConnection.getInstance().changeAddress(savedAddress);
     }
 
     public void OnResolutionChange()

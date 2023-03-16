@@ -111,7 +111,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
         DebugLog.getInstance().updateLog(LogType.WebCamText, "Access Camera Start", false);
         
         //Set a camera to the webcamTexture
-        webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 1024, 1024, 30);
+        webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 480, 480, 30);
 
         //Set the webcamTexture to the texture of the rawimage
         ImageScript.showTexture();
