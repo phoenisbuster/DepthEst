@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,8 @@ public class FeatureOptions : MonoBehaviour
     public float ScaleWhenClick = 1.5f;
     public FeatureList currentFeatureType = FeatureList.BuiltInPhoto;
     private Dictionary<FeatureList, FeaturesInstance> featureList = new Dictionary<FeatureList, FeaturesInstance>();
+
+    public static Action<FeatureList, FeatureList> onFeatureChange;
 
     void Awake() 
     {
@@ -60,6 +63,7 @@ public class FeatureOptions : MonoBehaviour
         {
             return;
         }
+        onFeatureChange.Invoke(currentFeatureType, type);
 
         featureList[currentFeatureType].setFeatureAttr(Color.white, true);
         featureList[currentFeatureType].changeScale(1, true);

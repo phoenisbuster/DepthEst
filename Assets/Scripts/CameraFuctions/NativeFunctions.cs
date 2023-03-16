@@ -7,11 +7,7 @@ using UnityEngine.UI;
 public class NativeFunctions : MonoBehaviour
 {
     public RawImage rawimage;
-    public Button recordBtn;
-    public Button captureBtn;
-    public Button changeCamera;
-    public Button changeImgRotate;
-    public int DefaultCameraIndex = 0;
+    public ImageLoader ImageScript;
 
     private static NativeFunctions instance;
 
@@ -25,38 +21,34 @@ public class NativeFunctions : MonoBehaviour
         return instance;
     }
 
-    public void clickRecord()
+    void Start() 
     {
-        if(checkCameraBusy())
-        {
-            return;
-        }
-        RecordVideo();
+        rawimage = ImageScript.rawimage;    
+    }
+
+    void OnDestroy() 
+    {
+        instance = null;
     }
 
     public void clickCapture()
     {
-        if(checkCameraBusy())
-        {
-            return;
-        }
-        TakePicture(1024);
-    } 
-
-    public void changeCameraIndex()
-    {
-        DefaultCameraIndex = DefaultCameraIndex == 0? 1 : 0;
+        TakePicture(2048);
     }
 
-    public void changeImageRotate()
+    public void clickRecord()
     {
-        Debug.Log(rawimage.transform.eulerAngles.z);
-        var newZ = 0;
-        if(rawimage.transform.eulerAngles.z == newZ)
-        {
-            newZ = -90;
-        }
-        rawimage.transform.eulerAngles = new Vector3(0, 0, newZ);
+        RecordVideo();
+    }
+
+    public void GetImageFromGallery()
+    {
+        PickImage(2048);
+    }
+
+    public void GetVideoFromGallery()
+    {
+        PickVideo();
     }
 
     private bool checkCameraBusy()
@@ -80,8 +72,9 @@ public class NativeFunctions : MonoBehaviour
                 }
 
                 // Asign texture to the RawImage in the Scene
+                ImageScript.showTexture();
                 rawimage.texture = texture;
-                rawimage.material.mainTexture = texture;
+
                 // If a procedural texture is not destroyed manually, 
                 // it will only be freed after a scene change
                 // Save to gallery before Destroy
@@ -132,6 +125,47 @@ public class NativeFunctions : MonoBehaviour
                                                                     }
         );
         //SaveToResources.Save(textureInstance.EncodeToPNG(), "TestNativeCam", "png");
-        Destroy(texture);
+        //Destroy(texture);
+    }
+
+    private void PickImage( int maxSize )
+    {
+        NativeGallery.Permission permission = NativeGallery.GetImageFromGallery( ( path ) =>
+        {
+            Debug.Log( "Image path: " + path );
+            if( path != null )
+            {
+                // Create Texture from selected image
+                Texture2D texture = NativeGallery.LoadImageAtPath( path, maxSize );
+                if( texture == null )
+                {
+                    Debug.Log( "Couldn't load texture from " + path );
+                    return;
+                }
+
+                // Asign texture to the RawImage in the Scene
+                ImageScript.showTexture();
+                rawimage.texture = texture;
+                
+                //Destroy( texture, 5f );
+            }
+        } );
+
+        Debug.Log( "Permission result: " + permission );
+    }
+
+    private void PickVideo()
+    {
+        NativeGallery.Permission permission = NativeGallery.GetVideoFromGallery( ( path ) =>
+        {
+            Debug.Log( "Video path: " + path );
+            if( path != null )
+            {
+                // Play the selected video
+                Handheld.PlayFullScreenMovie( "file://" + path );
+            }
+        }, "Select a video" );
+
+        Debug.Log( "Permission result: " + permission );
     }
 }

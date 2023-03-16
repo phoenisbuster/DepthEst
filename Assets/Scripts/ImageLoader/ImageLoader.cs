@@ -23,11 +23,6 @@ public class ImageLoader : MonoBehaviour
         rawimage.color = Color.black;
     }
 
-    // public static ImageLoader getInstance()
-    // {
-    //     return instance;
-    // }
-
     public void changeImageSize(float width, float height)
     {
         ImageWidth = width;
@@ -40,7 +35,7 @@ public class ImageLoader : MonoBehaviour
         rawimage.color = value;
     }
 
-    public void setTexture(Texture2D value)
+    public void setTexture(WebCamTexture value)
     {
         rawimage.texture = value;
     }
