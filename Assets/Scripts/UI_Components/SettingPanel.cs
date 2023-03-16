@@ -37,6 +37,7 @@ public class SettingPanel : MonoBehaviour
         {
             AddressInput.text = currentAddress;
             savedAddress = currentAddress;
+            WSConnection.getInstance().changeAddress(savedAddress);
         }
         ResolutionOption.value = currentOption;
     }
@@ -73,5 +74,6 @@ public class SettingPanel : MonoBehaviour
     {
         savedAddress = currentAddress;
         UserData.SaveServerAddress(savedAddress);
+        WSConnection.getInstance().changeAddress(savedAddress, true);
     }
 }

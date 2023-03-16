@@ -11,6 +11,8 @@ public class BuiltInCameraFunctions : MonoBehaviour
     public int DefaultCameraIndex = 0;
     public bool initWhenStart = false;
     private WebCamTexture webcamTexture;
+    private WebCamDevice[] cam_devices;
+    private int CameraNumber = 1;
 
     private static BuiltInCameraFunctions instance;
 
@@ -33,10 +35,14 @@ public class BuiltInCameraFunctions : MonoBehaviour
             initCamera();
         }
     }
+    void OnDestroy() 
+    {
+        instance = null;
+    }
 
     public void clickAccessCamera()
     {
-        initCamera();
+        accessCamera();
     }
 
     public void clickCapture()
@@ -46,8 +52,13 @@ public class BuiltInCameraFunctions : MonoBehaviour
 
     public void changeCameraIndex()
     {
+        if(CameraNumber <= 1)
+        {
+            return;
+        }
+        
         DefaultCameraIndex = DefaultCameraIndex == 0? 1 : 0;
-        webcamTexture.Stop();
+        StopWebCamTex();
         initCamera();
     }
 
@@ -56,12 +67,24 @@ public class BuiltInCameraFunctions : MonoBehaviour
         ImageScript.RotateImage();
     }
 
+    public void PauseWebCamTex(bool isHide = false)
+    {
+        if(webcamTexture.isPlaying)
+        {
+            webcamTexture.Pause();
+            if(isHide)
+            {
+                ImageScript.hideTexture();
+            }
+        }
+    }
+
     public void StopWebCamTex()
     {
         if(webcamTexture.isPlaying)
         {
             webcamTexture.Stop();
-            rawimage.color = Color.black;
+            ImageScript.hideTexture();
         }
     }
 
@@ -70,27 +93,32 @@ public class BuiltInCameraFunctions : MonoBehaviour
         if(!webcamTexture.isPlaying)
         {
             webcamTexture.Play();
-            rawimage.color = Color.white;
+            ImageScript.showTexture();
         }
     }
 
     private void initCamera()
     {
-        DebugLog.getInstance().updateLog(LogType.WebCamText, "Init Camera Start", false);
- 
         //Obtain camera devices available
-        WebCamDevice[] cam_devices = WebCamTexture.devices;
+        cam_devices = WebCamTexture.devices;
+        CameraNumber = cam_devices.Length;
+
+        accessCamera();
+    }
+
+    private void accessCamera()
+    {
+        DebugLog.getInstance().updateLog(LogType.WebCamText, "Access Camera Start", false);
+        
         //Set a camera to the webcamTexture
-        webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 480, 480, 30);
+        webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 1024, 1024, 30);
+
         //Set the webcamTexture to the texture of the rawimage
-        rawimage.color = Color.white;
-        rawimage.texture = webcamTexture;
-        //rawimage.material.mainTexture = webcamTexture;
+        ImageScript.showTexture();
+        ImageScript.setTexture(webcamTexture);
         
         //Start the camera
         webcamTexture.Play();
-
-        DebugLog.getInstance().updateLog(LogType.WebCamText, "Init Camera End");
     }
 
     private IEnumerator SaveImage()
@@ -105,7 +133,14 @@ public class BuiltInCameraFunctions : MonoBehaviour
         texture = RotateTexture(texture, -90);
         texture.Apply();
 
+        webcamTexture.Stop();
+
+        Debug.Log("CHECK texture isReadable " + texture.isReadable);
+        Debug.Log("CHECK rawimage isReadable " + rawimage.texture.isReadable);
+
         yield return new WaitForEndOfFrame();
+        //StopWebCamTex();
+        
 
         // Save the screenshot to Gallery/Photos
         NativeGallery.Permission permission = NativeGallery.SaveImageToGallery(
