@@ -30,6 +30,7 @@ public class ImageLoader : MonoBehaviour
     void Start()
     {
         rawimage.color = Color.black;
+        //rawimage.SetNativeSize();
     }
 
     public void calculateHoverParam()
@@ -68,8 +69,9 @@ public class ImageLoader : MonoBehaviour
     {
         ImageWidth = height;
         ImageHeight = width;
+        // rawimage.texture.width = (int)width;
+        // rawimage.texture.height = (int)height;
         rawimage.rectTransform.sizeDelta = new Vector2(ImageWidth, ImageHeight);
-
         calculateHoverParam();
     }
 

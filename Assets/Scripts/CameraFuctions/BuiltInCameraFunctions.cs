@@ -112,8 +112,14 @@ public class BuiltInCameraFunctions : MonoBehaviour
         DebugLog.getInstance().updateLog(LogType.WebCamText, "Access Camera Start", false);
         
         //Set a camera to the webcamTexture
+        Debug.Log("CHECK SCreen SIZE: " + Screen.width + " " + Screen.height);
         webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 480, 480, 30);
-
+        DebugLog.getInstance().updateLog(LogType.WebCamText, "Check Flip" + webcamTexture.videoVerticallyMirrored);
+        DebugLog.getInstance().updateLog(LogType.WebCamText, "Check Rotate" + webcamTexture.videoRotationAngle);
+        if(webcamTexture.videoVerticallyMirrored)
+        {
+            rawimage.GetComponent<RectTransform>().localScale = new Vector3(-1, 1, 1);
+        }
         //Set the webcamTexture to the texture of the rawimage
         ImageScript.showTexture();
         ImageScript.ToggleHover(false);
@@ -126,7 +132,8 @@ public class BuiltInCameraFunctions : MonoBehaviour
     private IEnumerator SaveImage()
     {
         DebugLog.getInstance().updateLog(LogType.WebCamText, "Save Pic Start", false);
-        
+        DebugLog.getInstance().updateLog(LogType.WebCamText, "CHECK IMAGE SIZE: " + rawimage.texture.width + " " + rawimage.texture.height);
+        Debug.Log("CHECK IMAGE SIZE: " + rawimage.texture.width + " " + rawimage.texture.height);
         //Create a Texture2D with the size of the rendered image on the screen.
         Texture2D texture = new Texture2D(rawimage.texture.width, rawimage.texture.height, TextureFormat.ARGB32, false);
         //Save the image to the Texture2D
@@ -135,7 +142,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
         texture = RotateTexture(texture, -90);
         texture.Apply();
 
-        webcamTexture.Stop();
+        webcamTexture.Pause();
         ImageScript.ToggleHover(true);
 
         Debug.Log("CHECK texture isReadable " + texture.isReadable);
