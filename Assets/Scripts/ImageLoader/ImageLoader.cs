@@ -68,6 +68,8 @@ public class ImageLoader : MonoBehaviour
     {
         ImageWidth = height;
         ImageHeight = width;
+        rawimage.texture.width = (int)width;
+        rawimage.texture.height = (int)height;
         rawimage.rectTransform.sizeDelta = new Vector2(ImageWidth, ImageHeight);
 
         calculateHoverParam();
