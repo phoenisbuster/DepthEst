@@ -114,7 +114,12 @@ public class BuiltInCameraFunctions : MonoBehaviour
         //Set a camera to the webcamTexture
         Debug.Log("CHECK SCreen SIZE: " + Screen.width + " " + Screen.height);
         webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 480, 480, 30);
-
+        DebugLog.getInstance().updateLog(LogType.WebCamText, "Check Flip" + webcamTexture.videoVerticallyMirrored);
+        DebugLog.getInstance().updateLog(LogType.WebCamText, "Check Rotate" + webcamTexture.videoRotationAngle);
+        if(webcamTexture.videoVerticallyMirrored)
+        {
+            rawimage.GetComponent<RectTransform>().localScale = new Vector3(-1, 1, 1);
+        }
         //Set the webcamTexture to the texture of the rawimage
         ImageScript.showTexture();
         ImageScript.ToggleHover(false);
