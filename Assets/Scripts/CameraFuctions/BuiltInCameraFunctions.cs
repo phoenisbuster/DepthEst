@@ -171,6 +171,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
         );
         SaveToResources.Save(texture.EncodeToPNG(), "TestWebCamText", "png");
         WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
+        RestFullAPI.TestAPI(texture.EncodeToPNG());
         // To avoid memory leaks
         Destroy(texture);
     }
