@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
 
+//"http://localhost:5000/upload"
 class RestFullAPI
 {
     public static async void TestAPI(byte[] content) 
@@ -13,13 +14,24 @@ class RestFullAPI
     
     static async Task Main(byte[] content)
     {
-        var httpClient = new HttpClient();
-        var requestContent = new MultipartFormDataContent();
-        var fileContent = new ByteArrayContent(content);
-        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
-        requestContent.Add(fileContent, "image", "image.png");
-        var response = await httpClient.PostAsync("http://localhost:5000/upload", requestContent);
-        var responseContent = await response.Content.ReadAsStringAsync();
-        Debug.Log(responseContent);
+        try
+        {    
+            var httpClient = new HttpClient();
+            var requestContent = new MultipartFormDataContent();
+            var fileContent = new ByteArrayContent(content);
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+            requestContent.Add(fileContent, "image", "image.png");
+
+            var fullUrl = "http://" + WSConnection.getInstance().address + "/upload";
+            Debug.Log(fullUrl);
+
+            var response = await httpClient.PostAsync(fullUrl, requestContent);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Debug.Log(responseContent);
+        }
+        catch(Exception e)
+        {
+            Debug.LogWarning("Unable to connect to Server: " + e.Message);
+        }
     }
 }
