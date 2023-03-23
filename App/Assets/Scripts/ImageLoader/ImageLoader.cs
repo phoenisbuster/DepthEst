@@ -13,6 +13,9 @@ public class ImageLoader : MonoBehaviour
     public float HoverWidth;
     public float HoverHeight;
 
+    public int TextureWidth;
+    public int TextureHeight;
+
     private HoverController HoverScript;
     private float minX;
     private float maxX;
@@ -31,6 +34,11 @@ public class ImageLoader : MonoBehaviour
     {
         rawimage.color = Color.black;
         //rawimage.SetNativeSize();
+        if(rawimage.texture)
+        {
+            Debug.Log("Img Loader check Width: " + rawimage.texture.width);
+            Debug.Log("Img Loader check Height: " + rawimage.texture.height);
+        }  
     }
 
     public void calculateHoverParam()
@@ -40,7 +48,7 @@ public class ImageLoader : MonoBehaviour
         maxY = ImageHeight/2 - HoverHeight/2;
         minY = -maxY;
 
-        HoverScript.setHoverParam(ImageWidth, 0, ImageHeight, 0);  
+        //HoverScript.setHoverParam(ImageWidth, 0, ImageHeight, 0);  
     }
 
     public void ToggleHover(bool isOn)
@@ -50,7 +58,7 @@ public class ImageLoader : MonoBehaviour
 
     public void ToggleHoverMovemnt(bool isOn)
     {
-        HoverScript.setAllowMovement(isOn);
+        //HoverScript.setAllowMovement(isOn);
     }
 
     public Vector2 getHoverPosition()
@@ -69,10 +77,8 @@ public class ImageLoader : MonoBehaviour
     {
         ImageWidth = height;
         ImageHeight = width;
-        // rawimage.texture.width = (int)width;
-        // rawimage.texture.height = (int)height;
+        
         rawimage.rectTransform.sizeDelta = new Vector2(ImageWidth, ImageHeight);
-        calculateHoverParam();
     }
 
     public void changeColor(Color value)
@@ -115,5 +121,41 @@ public class ImageLoader : MonoBehaviour
             newZ = -90;
         }
         rawimage.transform.eulerAngles = new Vector3(0, 0, newZ);
+        var w = rawimage.rectTransform.sizeDelta.x;
+        var h = rawimage.rectTransform.sizeDelta.y;
+        changeImageSize(w, h);
+    }
+
+    public void ChangeScaleX1()
+    {
+        var y = rawimage.rectTransform.localScale.y;
+        rawimage.rectTransform.localScale = new Vector3(1,y,1);
+    }
+
+    public void ChangeScaleXminus1()
+    {
+        var y = rawimage.rectTransform.localScale.y;
+        rawimage.rectTransform.localScale = new Vector3(-1,y,1);
+    }
+
+    public void ChangeScaleY1()
+    {
+        var x = rawimage.rectTransform.localScale.x;
+        rawimage.rectTransform.localScale = new Vector3(x,1,1);
+    }
+
+    public void ChangeScaleYminus1()
+    {
+        var x = rawimage.rectTransform.localScale.x;
+        rawimage.rectTransform.localScale = new Vector3(x,-1,1);
+    }
+
+    void Update() 
+    {
+        if(Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            Debug.Log("Img Loader check Width: " + rawimage.texture.width);
+            Debug.Log("Img Loader check Height: " + rawimage.texture.height);
+        }
     }
 }

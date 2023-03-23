@@ -60,7 +60,7 @@ public class SettingPanel : MonoBehaviour
             currentHeight = Int32.Parse(ResolutionOption.options[ResolutionOption.value].text.Split('x')[1]);
         }
         Debug.Log(currentWidth + " " + currentHeight);
-        ImageScript.changeImageSize(currentWidth, currentHeight);
+        //ImageScript.changeImageSize(currentWidth, currentHeight);
 
         UserData.SaveResolutionOption(ResolutionOption.value);
     }
