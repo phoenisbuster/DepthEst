@@ -65,13 +65,14 @@ public class BuiltInCameraFunctions : MonoBehaviour
         }
         
         DefaultCameraIndex = DefaultCameraIndex == 0? 1 : 0;
+        ImageLoader.changeStateSignal.Invoke(DefaultCameraIndex == 0? CameraState.BackCam : CameraState.FrontCam);
         StopWebCamTex();
-        initCamera();
+        initCamera(true);
     }
 
     public void changeImageRotate()
     {
-        ImageScript.RotateImage();
+        ImageScript.RotateImage(true);
     }
 
     public void PauseWebCamTex(bool isHide = false)
@@ -104,13 +105,14 @@ public class BuiltInCameraFunctions : MonoBehaviour
         }
     }
 
-    private void initCamera()
+    private void initCamera(bool accessImidiate = false)
     {
         //Obtain camera devices available
         cam_devices = WebCamTexture.devices;
         CameraNumber = cam_devices.Length;
 
-        //accessCamera();
+        if(accessImidiate)
+            accessCamera();
     }
 
     public void accessCamera()
@@ -126,7 +128,8 @@ public class BuiltInCameraFunctions : MonoBehaviour
 
         //Set the webcamTexture to the texture of the rawimage
         ImageScript.showTexture();
-        ImageScript.ToggleHover(false);
+        ImageScript.RotateImage(false, -90);
+        ImageScript.changeCameraState(DefaultCameraIndex == 0? CameraState.BackCam : CameraState.FrontCam);
         ImageScript.setTexture(webcamTexture);
         
         StartCoroutine(changeImageSize());
@@ -137,8 +140,8 @@ public class BuiltInCameraFunctions : MonoBehaviour
 
     private IEnumerator changeImageSize()
     {
-        yield return new WaitForEndOfFrame();
-        ImageScript.changeImageSize(rawimage.texture.width, rawimage.texture.height);
+        yield return new WaitForSeconds(0.5f);
+        //ImageScript.changeImageSize(rawimage.texture.width, rawimage.texture.height);
         Debug.Log("Check access Cam Hei" + rawimage.texture.height);
         Debug.Log("Check access Cam Wid" + rawimage.texture.width);
     }
@@ -156,12 +159,12 @@ public class BuiltInCameraFunctions : MonoBehaviour
         texture = RotateTexture(texture, -90);
         texture.Apply();
 
-        webcamTexture.Stop();
-        ImageScript.ToggleHover(true);
+        webcamTexture.Pause();
+        //ImageScript.ToggleHover(true);
 
         Debug.Log("CHECK texture isReadable " + texture.isReadable);
         Debug.Log("CHECK rawimage isReadable " + rawimage.texture.isReadable);
-
+        byte[] bytes = texture.EncodeToPNG();
         yield return new WaitForEndOfFrame();
         //StopWebCamTex();
         
@@ -181,11 +184,12 @@ public class BuiltInCameraFunctions : MonoBehaviour
                                                                                                 success + " at " +
                                                                                                 path 
                                                                         );
+                                                                        RestFullAPI.TestAPI(bytes);
                                                                     }
         );
         SaveToResources.Save(texture.EncodeToPNG(), "TestWebCamText", "png");
-        WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
-        RestFullAPI.TestAPI(texture.EncodeToPNG());
+        //WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
+        //RestFullAPI.TestAPI(texture.EncodeToPNG());
         // To avoid memory leaks
         Destroy(texture);
     }

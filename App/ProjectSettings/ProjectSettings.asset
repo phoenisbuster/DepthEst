@@ -248,7 +248,7 @@ PlayerSettings:
   AndroidTargetDevices: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: '{dedicated}: Unity Custom Packages/user.keystore'
+  AndroidKeystoreName: '{dedicated}: MyGame Custom Packages/user.keystore'
   AndroidKeyaliasName: phuc
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 0
