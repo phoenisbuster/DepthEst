@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 //"http://localhost:5000/upload"
-class RestFullAPI
-{
+public class RestFullAPI : MonoBehaviour
+{   
     public static async void TestAPI(byte[] content) 
     {
         await Main(content);
@@ -32,6 +32,10 @@ class RestFullAPI
         catch(Exception e)
         {
             Debug.LogWarning("Unable to connect to Server: " + e.Message);
+        }
+        finally
+        {
+            PanelDown.ToggleEditMode.Invoke(true, true);
         }
     }
 }

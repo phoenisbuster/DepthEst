@@ -34,7 +34,7 @@ public class WSConnection : MonoBehaviour
 
     void Start()
     {
-        OpenWS();
+        //OpenWS();
     }
 
     public string getFullAddress()
@@ -57,7 +57,7 @@ public class WSConnection : MonoBehaviour
                 CloseWS();
             if(reconnect)
             {
-                StartCoroutine(ConnectWS());
+                //StartCoroutine(ConnectWS());
             }
         }
         return getFullAddress();

@@ -64,7 +64,7 @@ public class NativeFunctions : MonoBehaviour
             if( path != null )
             {
                 // Create a Texture2D from the captured image
-                Texture2D texture = NativeCamera.LoadImageAtPath( path, maxSize );
+                Texture2D texture = NativeCamera.LoadImageAtPath(path, maxSize, false, true);
                 if(texture == null)
                 {
                     DebugLog.getInstance().updateLog(LogType.NativeCamera, "Couldn't load texture: " + path, false);
@@ -73,7 +73,8 @@ public class NativeFunctions : MonoBehaviour
 
                 // Asign texture to the RawImage in the Scene
                 ImageScript.showTexture();
-                ImageScript.ToggleHover(true);
+                ImageScript.RotateImage(false, 0);
+                ImageScript.changeCameraState(CameraState.Display);
                 rawimage.texture = texture;
 
                 // If a procedural texture is not destroyed manually, 
@@ -81,6 +82,11 @@ public class NativeFunctions : MonoBehaviour
                 // Save to gallery before Destroy
                 StartCoroutine(SaveImage(texture));
                 //Destroy(texture, 5f );
+            }
+            else
+            {
+                DebugLog.getInstance().updateLog(LogType.NativeCamera, "Cancel Image Picker");
+                PanelDown.ToggleEditMode.Invoke(true, true);
             }
         }, maxSize );
 
@@ -106,6 +112,7 @@ public class NativeFunctions : MonoBehaviour
     {
         Texture2D textureInstance = new Texture2D(rawimage.texture.width, rawimage.texture.height, TextureFormat.ARGB32, false);
         textureInstance = texture;
+        byte[] bytes = textureInstance.EncodeToPNG();
 
         yield return new WaitForEndOfFrame();
 
@@ -123,9 +130,10 @@ public class NativeFunctions : MonoBehaviour
                                                                                                 success + " at " +
                                                                                                 path 
                                                                         );
+                                                                        RestFullAPI.TestAPI(bytes);
                                                                     }
         );
-        WSConnection.getInstance().setTextureData(textureInstance.EncodeToPNG());
+        Destroy(texture, 5f);  
     }
 
     private void PickImage( int maxSize )
@@ -136,7 +144,7 @@ public class NativeFunctions : MonoBehaviour
             if( path != null )
             {
                 // Create Texture from selected image
-                Texture2D texture = NativeGallery.LoadImageAtPath( path, maxSize );
+                Texture2D texture = NativeGallery.LoadImageAtPath(path, maxSize, false, true);
                 if( texture == null )
                 {
                     Debug.Log( "Couldn't load texture from " + path );
@@ -145,11 +153,19 @@ public class NativeFunctions : MonoBehaviour
 
                 // Asign texture to the RawImage in the Scene
                 ImageScript.showTexture();
-                ImageScript.ToggleHover(true);
+                ImageScript.RotateImage(false, 0);
+                ImageScript.changeCameraState(CameraState.Display);
                 rawimage.texture = texture;
+                byte[] bytes = texture.EncodeToPNG();
                 
-                WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
-                //Destroy( texture, 5f );
+                //WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
+                RestFullAPI.TestAPI(bytes);
+                Destroy(texture, 5f);
+            }
+            else
+            {
+                DebugLog.getInstance().updateLog(LogType.NativeCamera, "Cancel Image Picker");
+                PanelDown.ToggleEditMode.Invoke(true, true);
             }
         } );
 

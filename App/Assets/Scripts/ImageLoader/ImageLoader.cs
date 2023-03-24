@@ -1,8 +1,24 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+
+public enum CameraState
+{
+    Disable,
+    FrontCam,
+    BackCam,
+    Display
+}
+
+public enum DeviceType
+{
+    Editor,
+    IOS,
+    Android
+}
 
 public class ImageLoader : MonoBehaviour
 {
@@ -10,55 +26,108 @@ public class ImageLoader : MonoBehaviour
     public Image squareHover;
     public float ImageWidth;
     public float ImageHeight;
-    public float HoverWidth;
-    public float HoverHeight;
-
     public int TextureWidth;
     public int TextureHeight;
+    public CameraState currentState = CameraState.Disable;
+    public DeviceType currentDevice = DeviceType.Editor;
+    public static Action<CameraState> changeStateSignal;
 
-    private HoverController HoverScript;
-    private float minX;
-    private float maxX;
-    private float minY;
-    private float maxY;
-
-    //private static ImageLoader instance;
-    
     // Start is called before the first frame update
     void Awake() 
     {
-        HoverScript = squareHover.GetComponent<HoverController>();
+        #if UNITY_IOS
+            TextureWidth = 360*2;
+            TextureHeight = 480*2;
+            currentDevice = DeviceType.IOS;
+            changeCameraState(CameraState.BackCam);
+            changeImageSize();
+            Debug.Log("Device IOS");
+        #endif
+
+        #if UNITY_EDITOR
+            TextureWidth = 640*2;
+            TextureHeight = 480*2;
+            currentDevice = DeviceType.Editor;
+            changeCameraState(CameraState.FrontCam);
+            RotateImage(false, 0);
+            Debug.Log("Device Editor");
+        #endif
+
+        #if UNITY_ANDROID
+            TextureWidth = 480*2;
+            TextureHeight = 640*2;
+            currentDevice = DeviceType.Android;
+            changeCameraState(CameraState.BackCam);
+            changeImageSize();
+            Debug.Log("Device Android");
+        #endif
     }
 
     void Start()
     {
-        rawimage.color = Color.black;
-        //rawimage.SetNativeSize();
-        if(rawimage.texture)
+        changeCameraState(CameraState.Disable);
+    }
+
+    private void OnEnable() 
+    {
+        ImageLoader.changeStateSignal += changeCameraState;
+    }
+
+    private void OnDisable() 
+    {
+        ImageLoader.changeStateSignal -= changeCameraState;
+    }
+
+    public void changeCameraState(CameraState newState)
+    {
+        currentState = newState;
+        switch(currentState)
         {
-            Debug.Log("Img Loader check Width: " + rawimage.texture.width);
-            Debug.Log("Img Loader check Height: " + rawimage.texture.height);
-        }  
-    }
-
-    public void calculateHoverParam()
-    {
-        maxX = ImageWidth/2 - HoverWidth/2;
-        minX = -maxX;
-        maxY = ImageHeight/2 - HoverHeight/2;
-        minY = -maxY;
-
-        //HoverScript.setHoverParam(ImageWidth, 0, ImageHeight, 0);  
-    }
-
-    public void ToggleHover(bool isOn)
-    {
-        squareHover.gameObject.SetActive(isOn);
-    }
-
-    public void ToggleHoverMovemnt(bool isOn)
-    {
-        //HoverScript.setAllowMovement(isOn);
+            case CameraState.Disable:
+                hideTexture();
+                break;
+            case CameraState.FrontCam:
+                showTexture();
+                if(currentDevice == DeviceType.Editor)
+                {
+                    ChangeScaleXminus1();
+                }
+                else if(currentDevice == DeviceType.IOS)
+                {
+                    ChangeScaleX1();
+                    ChangeScaleY1();
+                }
+                else
+                {
+                    ChangeScaleXminus1();
+                    ChangeScaleY1();
+                }
+                break;
+            case CameraState.BackCam:
+                showTexture();
+                if(currentDevice == DeviceType.Editor)
+                {
+                    return;
+                }
+                else if(currentDevice == DeviceType.IOS)
+                {
+                    ChangeScaleX1();
+                    ChangeScaleYminus1();
+                }
+                else
+                {
+                    ChangeScaleX1();
+                    ChangeScaleY1();
+                }
+                break;
+            case CameraState.Display:
+                if(currentDevice != DeviceType.Editor)
+                {
+                    ChangeScaleX1();
+                    ChangeScaleY1();
+                }
+                break;  
+        }
     }
 
     public Vector2 getHoverPosition()
@@ -73,11 +142,18 @@ public class ImageLoader : MonoBehaviour
         return squareHover.transform.GetComponent<RectTransform>().anchoredPosition;
     }
 
-    public void changeImageSize(float width, float height)
+    public void changeImageSize()
     {
-        ImageWidth = height;
-        ImageHeight = width;
-        
+        if(rawimage.transform.eulerAngles.z == 0)
+        {
+            ImageWidth = TextureWidth;
+            ImageHeight = TextureHeight;
+        }
+        else
+        {
+            ImageWidth = TextureHeight;
+            ImageHeight = TextureWidth;
+        }
         rawimage.rectTransform.sizeDelta = new Vector2(ImageWidth, ImageHeight);
     }
 
@@ -112,18 +188,20 @@ public class ImageLoader : MonoBehaviour
         changeColor(Color.black);
     }
 
-    public void RotateImage()
+    public void RotateImage(bool toggle, float angle = 0)
     {
         Debug.Log(rawimage.transform.eulerAngles.z);
-        var newZ = 0;
-        if(rawimage.transform.eulerAngles.z == newZ)
+        var newZ = angle;
+        if(toggle)
         {
-            newZ = -90;
+            newZ = 0;
+            if(rawimage.transform.eulerAngles.z == newZ)
+            {
+                newZ = -90;
+            }
         }
         rawimage.transform.eulerAngles = new Vector3(0, 0, newZ);
-        var w = rawimage.rectTransform.sizeDelta.x;
-        var h = rawimage.rectTransform.sizeDelta.y;
-        changeImageSize(w, h);
+        changeImageSize();
     }
 
     public void ChangeScaleX1()
