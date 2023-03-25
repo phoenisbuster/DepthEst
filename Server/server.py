@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 import base64
 
 app = Flask(__name__)
@@ -7,15 +7,15 @@ app = Flask(__name__)
 def upload():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided.'}), 400
-    
-    image = request.files['image']
-    if not image.filename.endswith('.png'):
+
+    image_file = request.files['image']
+    if not image_file.filename.endswith('.png'):
         return jsonify({'error': 'File must be in PNG format.'}), 400
-    
-    img_base64 = base64.b64encode(image.read()).decode('ascii')
+
+    with image_file.stream as image_stream:
+        img_bytes = image_stream.read()
+    img_base64 = base64.b64encode(img_bytes).decode('ascii')
     return jsonify({'image': img_base64}), 200
-
-
 
 
 if __name__ == '__main__':
