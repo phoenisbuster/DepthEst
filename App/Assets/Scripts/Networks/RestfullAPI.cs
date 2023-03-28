@@ -22,12 +22,28 @@ public class RestFullAPI : MonoBehaviour
             fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
             requestContent.Add(fileContent, "image", "image.png");
 
+            httpClient.DefaultRequestHeaders.Add("X-CSRF-Token", "my-secret-key");
+
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
+            Debug.Log(httpClient.Timeout);
+
             var fullUrl = "http://" + WSConnection.getInstance().address + "/upload";
             Debug.Log(fullUrl);
 
             var response = await httpClient.PostAsync(fullUrl, requestContent);
+            Debug.Log(response.StatusCode);
             var responseContent = await response.Content.ReadAsStringAsync();
-            Debug.Log(responseContent);
+            switch(response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.OK:
+                    Debug.Log(responseContent);
+                    break;
+
+                case System.Net.HttpStatusCode.Forbidden:
+                case System.Net.HttpStatusCode.BadRequest:
+                    throw new Exception(responseContent);
+            }
+            
         }
         catch(Exception e)
         {
