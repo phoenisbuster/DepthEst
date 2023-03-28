@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import base64
 import os
+import time
 
 app = Flask(__name__)
 
@@ -26,6 +27,7 @@ def process_image(img_bytes):
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    # print(request.files)
     # Check CSRF token
     if request.headers.get('X-CSRF-Token') != app.secret_key:
         return jsonify({'error': 'Invalid CSRF token.'}), 403
@@ -46,4 +48,4 @@ def upload():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
