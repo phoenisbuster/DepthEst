@@ -43,7 +43,13 @@ public class BuiltInCameraFunctions : MonoBehaviour
     public void clickAccessCamera()
     {
         if(webcamTexture != null && !webcamTexture.isPlaying)
+        {
             accessCamera();
+        } 
+        else
+        {
+            Debug.LogWarning("Access Cam FAIL");
+        }
     }
 
     public void clickCapture()
@@ -59,13 +65,14 @@ public class BuiltInCameraFunctions : MonoBehaviour
         }
         
         DefaultCameraIndex = DefaultCameraIndex == 0? 1 : 0;
+        ImageLoader.changeStateSignal.Invoke(DefaultCameraIndex == 0? CameraState.BackCam : CameraState.FrontCam);
         StopWebCamTex();
-        initCamera();
+        initCamera(true);
     }
 
     public void changeImageRotate()
     {
-        ImageScript.RotateImage();
+        ImageScript.RotateImage(true);
     }
 
     public void PauseWebCamTex(bool isHide = false)
@@ -98,35 +105,45 @@ public class BuiltInCameraFunctions : MonoBehaviour
         }
     }
 
-    private void initCamera()
+    private void initCamera(bool accessImidiate = false)
     {
         //Obtain camera devices available
         cam_devices = WebCamTexture.devices;
         CameraNumber = cam_devices.Length;
 
-        accessCamera();
+        if(accessImidiate)
+            accessCamera();
     }
 
-    private void accessCamera()
+    public void accessCamera()
     {
         DebugLog.getInstance().updateLog(LogType.WebCamText, "Access Camera Start", false);
         
         //Set a camera to the webcamTexture
-        Debug.Log("CHECK SCreen SIZE: " + Screen.width + " " + Screen.height);
+        Debug.Log("CHECK Screen SIZE: " + Screen.width + " " + Screen.height);
         webcamTexture = new WebCamTexture(cam_devices[DefaultCameraIndex].name, 480, 480, 30);
+        Debug.Log(webcamTexture);
         DebugLog.getInstance().updateLog(LogType.WebCamText, "Check Flip" + webcamTexture.videoVerticallyMirrored);
         DebugLog.getInstance().updateLog(LogType.WebCamText, "Check Rotate" + webcamTexture.videoRotationAngle);
-        if(webcamTexture.videoVerticallyMirrored)
-        {
-            rawimage.GetComponent<RectTransform>().localScale = new Vector3(-1, 1, 1);
-        }
+
         //Set the webcamTexture to the texture of the rawimage
         ImageScript.showTexture();
-        ImageScript.ToggleHover(false);
+        ImageScript.RotateImage(false, -90);
+        ImageScript.changeCameraState(DefaultCameraIndex == 0? CameraState.BackCam : CameraState.FrontCam);
         ImageScript.setTexture(webcamTexture);
+        
+        StartCoroutine(changeImageSize());
         
         //Start the camera
         webcamTexture.Play();
+    }
+
+    private IEnumerator changeImageSize()
+    {
+        yield return new WaitForSeconds(0.5f);
+        //ImageScript.changeImageSize(rawimage.texture.width, rawimage.texture.height);
+        Debug.Log("Check access Cam Hei" + rawimage.texture.height);
+        Debug.Log("Check access Cam Wid" + rawimage.texture.width);
     }
 
     private IEnumerator SaveImage()
@@ -143,11 +160,11 @@ public class BuiltInCameraFunctions : MonoBehaviour
         texture.Apply();
 
         webcamTexture.Pause();
-        ImageScript.ToggleHover(true);
+        //ImageScript.ToggleHover(true);
 
         Debug.Log("CHECK texture isReadable " + texture.isReadable);
         Debug.Log("CHECK rawimage isReadable " + rawimage.texture.isReadable);
-
+        byte[] bytes = texture.EncodeToPNG();
         yield return new WaitForEndOfFrame();
         //StopWebCamTex();
         
@@ -167,11 +184,12 @@ public class BuiltInCameraFunctions : MonoBehaviour
                                                                                                 success + " at " +
                                                                                                 path 
                                                                         );
+                                                                        RestFullAPI.TestAPI(bytes);
                                                                     }
         );
         SaveToResources.Save(texture.EncodeToPNG(), "TestWebCamText", "png");
-        WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
-        RestFullAPI.TestAPI(texture.EncodeToPNG());
+        //WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
+        //RestFullAPI.TestAPI(texture.EncodeToPNG());
         // To avoid memory leaks
         Destroy(texture);
     }
