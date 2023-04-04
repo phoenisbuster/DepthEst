@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
 using TMPro;
+using Newtonsoft.Json.Linq;
 
 //"http://localhost:5000/upload"
 public class RestFullAPI : MonoBehaviour
@@ -48,8 +49,8 @@ public class RestFullAPI : MonoBehaviour
             {
                 case System.Net.HttpStatusCode.OK:
                     Debug.Log(responseContent);
-                    //JObject json = JObject.Parse(responseContent);
-                    _instance.setResultDisplay(responseContent);
+                    var json = JObject.Parse(responseContent);
+                    _instance.setResultDisplay(json["distance"].ToString());
                     break;
 
                 case System.Net.HttpStatusCode.Forbidden:
