@@ -13,6 +13,8 @@ public class PanelDown : MonoBehaviour
     public Button ChangeCameraBtn;
     public Button SendPictureBtn;
     public FeatureOptions FeatureOptionsScript;
+
+    public static Action<bool, bool> ToggleEditMode;
     
     // Start is called before the first frame update
     void Start()
@@ -23,11 +25,13 @@ public class PanelDown : MonoBehaviour
     private void OnEnable() 
     {
         FeatureOptions.onFeatureChange += onFeatureChange;
+        PanelDown.ToggleEditMode += ShowEditMode;
     }
 
     private void OnDisable() 
     {
         FeatureOptions.onFeatureChange -= onFeatureChange;
+        PanelDown.ToggleEditMode -= ShowEditMode;
     }
 
     private void onFeatureChange(FeatureList oldType, FeatureList newType)
@@ -43,23 +47,31 @@ public class PanelDown : MonoBehaviour
                 break;
 
             case FeatureList.NativePhoto:
+                ShowEditMode(true, false);
                 BuiltInCameraFunctions.getInstance().StopWebCamTex();
+                NativeFunctions.getInstance().clickCapture();
                 break;
 
             case FeatureList.NativeRecord:
+                ShowEditMode(true, false);
                 BuiltInCameraFunctions.getInstance().StopWebCamTex();
+                NativeFunctions.getInstance().clickRecord();
                 break;
         } 
     }
 
-    private void ShowEditMode(bool isShow = false)
+    private void ShowEditMode(bool isShow = false, bool isForceShow = false)
     {
         CapturePictureBtn.gameObject.SetActive(!isShow);
         AccessGalleryBtn.gameObject.SetActive(!isShow);
         ChangeCameraBtn.gameObject.SetActive(!isShow);
         FeatureOptionsScript.gameObject.SetActive(!isShow);
 
-        SendPictureBtn.gameObject.SetActive(isShow);
+        if(isForceShow)
+        {
+            SendPictureBtn.gameObject.SetActive(isShow);
+            //RestFullAPI._instance.setResultDisplay();
+        }    
     }
 
     public void onClikcCapture()
@@ -67,22 +79,22 @@ public class PanelDown : MonoBehaviour
         switch(FeatureOptionsScript.currentFeatureType)
         {
             case FeatureList.BuiltInPhoto:
+                ShowEditMode(true, false);
                 BuiltInCameraFunctions.getInstance().clickCapture();
-                ShowEditMode(true);
                 break;
             
             case FeatureList.RealtimeRender:
-                ShowEditMode(true);
+                ShowEditMode(true, true);
                 break;
 
             case FeatureList.NativePhoto:
+                ShowEditMode(true, false);
                 NativeFunctions.getInstance().clickCapture();
-                ShowEditMode(true);
                 break;
 
             case FeatureList.NativeRecord:
+                ShowEditMode(true, false);
                 NativeFunctions.getInstance().clickRecord();
-                ShowEditMode(true);
                 break;
         }  
     }
@@ -101,7 +113,7 @@ public class PanelDown : MonoBehaviour
         BuiltInCameraFunctions.getInstance().StopWebCamTex();
         NativeFunctions.getInstance().GetImageFromGallery();
 
-        ShowEditMode(true);
+        ShowEditMode(true, false);
     }
 
     public void setSendPictureBtn(bool isOn)
@@ -115,25 +127,29 @@ public class PanelDown : MonoBehaviour
         switch(FeatureOptionsScript.currentFeatureType)
         {
             case FeatureList.BuiltInPhoto:
+                ShowEditMode(false, true);
+                RestFullAPI._instance.setResultDisplay();
                 BuiltInCameraFunctions.getInstance().clickAccessCamera();
-                ShowEditMode(false);
-                WSConnection.getInstance().setTargetPos();
+                //WSConnection.getInstance().setTargetPos();
                 break;
             
             case FeatureList.RealtimeRender:
-                ShowEditMode(false);
+                ShowEditMode(false, true);
+                RestFullAPI._instance.setResultDisplay();
                 break;
 
             case FeatureList.NativePhoto:
+                ShowEditMode(false, true);
+                RestFullAPI._instance.setResultDisplay();
                 BuiltInCameraFunctions.getInstance().ImageScript.hideTexture();
-                ShowEditMode(false);
-                WSConnection.getInstance().setTargetPos();
+                //WSConnection.getInstance().setTargetPos();
                 break;
 
             case FeatureList.NativeRecord:
+                ShowEditMode(false, true);
+                RestFullAPI._instance.setResultDisplay();
                 BuiltInCameraFunctions.getInstance().ImageScript.hideTexture();
-                ShowEditMode(false);
-                WSConnection.getInstance().setTargetPos();
+                //WSConnection.getInstance().setTargetPos();
                 break;
         }
     }

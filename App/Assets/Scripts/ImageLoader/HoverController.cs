@@ -38,13 +38,13 @@ public class HoverController : MonoBehaviour
     
     private void Awake() 
     {
-        #if UNITY_ANDROID || UNITY_IOS
-            EnableTouchInput = true;
-        #endif
+        // #if UNITY_ANDROID || UNITY_IOS
+        //     EnableTouchInput = true;
+        // #endif
 
-        #if UNITY_STANDALONE || UNITY_WEBGL || UNITY_EDITOR
-            EnableTouchInput = false;
-        #endif
+        // #if UNITY_STANDALONE || UNITY_WEBGL || UNITY_EDITOR
+        //     EnableTouchInput = false;
+        // #endif
     }
 
     void Start()
