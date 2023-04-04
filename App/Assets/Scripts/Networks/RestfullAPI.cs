@@ -3,10 +3,21 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
+using TMPro;
+using Newtonsoft.Json.Linq;
 
 //"http://localhost:5000/upload"
 public class RestFullAPI : MonoBehaviour
 {   
+    public TextMeshProUGUI ResultDisplay;
+
+    public static RestFullAPI _instance;
+
+    private void Awake() 
+    {
+        _instance = this;
+    }
+
     public static async void TestAPI(byte[] content) 
     {
         await Main(content);
@@ -16,6 +27,7 @@ public class RestFullAPI : MonoBehaviour
     {
         try
         {    
+            _instance.setResultDisplay("Loading...");
             var httpClient = new HttpClient();
             var requestContent = new MultipartFormDataContent();
             var fileContent = new ByteArrayContent(content);
@@ -37,6 +49,8 @@ public class RestFullAPI : MonoBehaviour
             {
                 case System.Net.HttpStatusCode.OK:
                     Debug.Log(responseContent);
+                    var json = JObject.Parse(responseContent);
+                    _instance.setResultDisplay(json["distance"].ToString());
                     break;
 
                 case System.Net.HttpStatusCode.Forbidden:
@@ -48,10 +62,16 @@ public class RestFullAPI : MonoBehaviour
         catch(Exception e)
         {
             Debug.LogWarning("Unable to connect to Server: " + e.Message);
+            _instance.setResultDisplay(e.Message);
         }
         finally
         {
             PanelDown.ToggleEditMode.Invoke(true, true);
         }
+    }
+
+    public void setResultDisplay(string value = "")
+    {
+        ResultDisplay.text = value;
     }
 }
