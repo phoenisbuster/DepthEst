@@ -5,7 +5,7 @@
 (Option 1)
 !!! Run Flask + WSGI (ubuntu)
 
-$ gunicorn server_api:app -w 4 -b 0.0.0.0:6969
+$ gunicorn wsgi_server:app -w 4 -b 0.0.0.0:6969
 
 
 
