@@ -19,8 +19,33 @@ def allowed_file(filename):
 def process_image(img_bytes):
     """Process uploaded image with AI model and return distance of object in frame"""
     # TODO: add AI model code to process image and return distance of object
-    distance = 10  # Placeholder value for demonstration purposes only
-    return distance
+    scale = 3.159407911e-4
+    shift = -0.11237868
+
+    img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    input_size = img.shape[0] if img.shape[0] <= img.shape[1] else img.shape[1]
+    
+    img = CenterCrop(input_size)(img)
+    input_batch = data_transform(img).to(device)
+
+    with torch.no_grad():
+        prediction = model(input_batch)
+        prediction = torch.nn.functional.interpolate(
+            prediction.unsqueeze(1),
+            size=img.shape[:2],
+            mode="bicubic",
+            align_corners=False,
+        ).squeeze()
+
+    output = prediction.cpu().numpy()
+
+    pred_distance = 1 / (output*scale + shift)
+    pred_distance = pred_distance[input_size/2][input_size/2]
+
+    byte_im = (output/output.max()*255)
+    byte_im = cv2.imencode(".png", byte_im)[1].tobytes()
+    return pred_distance, byte_im
 
 
 @app.route('/upload', methods=['POST'])
