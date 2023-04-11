@@ -1,15 +1,35 @@
 import cv2
 import torch
 import torch.nn as nn
+import numpy as np
 import torch.nn.functional as F
 from torchvision.transforms import Compose
-from .Model import networks
-from .Model.transforms import Resize, NormalizeImage, PrepareForNet, CenterCrop
+from Model import networks
+from Model.transforms import Resize, NormalizeImage, PrepareForNet, CenterCrop
 
 from flask import Flask, jsonify, request
 import os
 
 app = Flask(__name__)
+
+
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+data_transform = Compose(
+        [
+            lambda img: {"image": img / 255.0},            
+            Resize(
+                width=384,
+                height=384,
+                ensure_multiple_of=32,
+                image_interpolation_method=cv2.INTER_CUBIC,
+            ),
+            NormalizeImage(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            PrepareForNet(),
+            lambda sample: torch.from_numpy(sample["image"]).unsqueeze(0),
+        ]
+    )
+model = networks.MidasNet().to(device=device)
+model.load_state_dict(torch.load("Weight/model_ckpt.pt",map_location=device))
 
 # Set allowed image extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -30,6 +50,7 @@ def process_image(img_bytes):
     scale = 3.159407911e-4
     shift = -0.11237868
 
+    img_bytes= np.frombuffer(img_bytes, dtype="uint8")
     img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     input_size = img.shape[0] if img.shape[0] <= img.shape[1] else img.shape[1]
@@ -49,10 +70,12 @@ def process_image(img_bytes):
     output = prediction.cpu().numpy()
 
     pred_distance = 1 / (output*scale + shift)
-    pred_distance = pred_distance[input_size/2][input_size/2]
+    pred_distance = pred_distance[int(input_size/2)][int(input_size/2)]
+    pred_distance = str(round(pred_distance,2)) #Cast2str
 
 #     byte_im = (output/output.max()*255)
 #     byte_im = cv2.imencode(".png", byte_im)[1].tobytes()
+
     return pred_distance#, byte_im
 
 
@@ -74,25 +97,11 @@ def upload():
     # Read file contents from memory, encode as base64, and return as JSON response
     img_bytes = image_file.read()
     distance = process_image(img_bytes)
+    
     return jsonify({'distance': distance}), 200
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    data_transform = Compose(
-        [
-            lambda img: {"image": img / 255.0},            
-            Resize(
-                width=384,
-                height=384,
-                ensure_multiple_of=32,
-                image_interpolation_method=cv2.INTER_CUBIC,
-            ),
-            NormalizeImage(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            PrepareForNet(),
-            lambda sample: torch.from_numpy(sample["image"]).unsqueeze(0),
-        ]
-    )
-    model = networks.MidasNet()
-    model.load_state_dict(torch.load("Server/Model/checkpoints/model_ckpt.pt"))
+    
+    
     app.run(host = '0.0.0.0', port = 5000, debug =True)
