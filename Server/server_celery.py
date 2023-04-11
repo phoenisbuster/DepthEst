@@ -1,3 +1,11 @@
+import cv2
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision.transforms import Compose
+from .Model import networks
+from .Model.transforms import Resize, NormalizeImage, PrepareForNet, CenterCrop
+
 from flask import Flask, jsonify, request
 import os
 import base64
@@ -90,4 +98,21 @@ def upload():
 
 
 if __name__ == '__main__':
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    data_transform = Compose(
+        [
+            lambda img: {"image": img / 255.0},            
+            Resize(
+                width=384,
+                height=384,
+                ensure_multiple_of=32,
+                image_interpolation_method=cv2.INTER_CUBIC,
+            ),
+            NormalizeImage(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            PrepareForNet(),
+            lambda sample: torch.from_numpy(sample["image"]).unsqueeze(0),
+        ]
+    )
+    model = networks.MidasNet()
+    model.load_state_dict(torch.load("Server/Model/checkpoints/model_ckpt.pt"))
     app.run(debug=True)
