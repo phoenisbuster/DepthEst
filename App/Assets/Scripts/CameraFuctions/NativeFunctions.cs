@@ -133,7 +133,7 @@ public class NativeFunctions : MonoBehaviour
                                                                         RestFullAPI.TestAPI(bytes);
                                                                     }
         );
-        Destroy(texture, 5f);  
+        Destroy(texture, 10f);  
     }
 
     private void PickImage( int maxSize )

@@ -152,7 +152,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
         DebugLog.getInstance().updateLog(LogType.WebCamText, "CHECK IMAGE SIZE: " + rawimage.texture.width + " " + rawimage.texture.height);
         Debug.Log("CHECK IMAGE SIZE: " + rawimage.texture.width + " " + rawimage.texture.height);
         //Create a Texture2D with the size of the rendered image on the screen.
-        Texture2D texture = new Texture2D(rawimage.texture.width, rawimage.texture.height, TextureFormat.ARGB32, false);
+        Texture2D texture = new Texture2D(rawimage.texture.width*2, rawimage.texture.height*2, TextureFormat.ARGB32, false);
         //Save the image to the Texture2D
         texture.SetPixels(webcamTexture.GetPixels());
         //Rotate textture 90 degree to bypass the default option in Unity

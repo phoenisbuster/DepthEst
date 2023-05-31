@@ -13,6 +13,8 @@ public class RestFullAPI : MonoBehaviour
 
     public static RestFullAPI _instance;
 
+    public string address = "";
+
     private void Awake() 
     {
         _instance = this;
@@ -39,7 +41,7 @@ public class RestFullAPI : MonoBehaviour
             httpClient.Timeout = TimeSpan.FromSeconds(10);
             Debug.Log(httpClient.Timeout);
 
-            var fullUrl = "http://" + WSConnection.getInstance().address + "/upload";
+            var fullUrl = "http://" + RestFullAPI._instance.address + "/upload";
             Debug.Log(fullUrl);
 
             var response = await httpClient.PostAsync(fullUrl, requestContent);
@@ -73,5 +75,14 @@ public class RestFullAPI : MonoBehaviour
     public void setResultDisplay(string value = "")
     {
         ResultDisplay.text = value;
+    }
+
+    public string changeAddress(string value)
+    {
+        if(value != "" && value != address)
+        {
+            address = value;
+        }
+        return "http://" + address + "/upload";
     }
 }
