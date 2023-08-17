@@ -6,12 +6,11 @@ using UnityEngine;
 using TMPro;
 using Newtonsoft.Json.Linq;
 
-//"http://localhost:5000/upload"
-public class RestFullAPI : MonoBehaviour
+public class RestAPI : MonoBehaviour
 {   
     public TextMeshProUGUI ResultDisplay;
 
-    public static RestFullAPI _instance;
+    public static RestAPI _instance;
 
     private void Awake() 
     {
@@ -39,7 +38,7 @@ public class RestFullAPI : MonoBehaviour
             httpClient.Timeout = TimeSpan.FromSeconds(10);
             Debug.Log(httpClient.Timeout);
 
-            var fullUrl = "http://" + WSConnection.getInstance().address + "/upload";
+            var fullUrl = "http://" + RestAPI._instance.address + "/upload";
             Debug.Log(fullUrl);
 
             var response = await httpClient.PostAsync(fullUrl, requestContent);

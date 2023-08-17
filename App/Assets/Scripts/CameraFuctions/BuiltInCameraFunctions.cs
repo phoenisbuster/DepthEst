@@ -184,7 +184,7 @@ public class BuiltInCameraFunctions : MonoBehaviour
                                                                                                 success + " at " +
                                                                                                 path 
                                                                         );
-                                                                        RestFullAPI.TestAPI(bytes);
+                                                                        RestAPI.TestAPI(bytes);
                                                                     }
         );
         SaveToResources.Save(texture.EncodeToPNG(), "TestWebCamText", "png");

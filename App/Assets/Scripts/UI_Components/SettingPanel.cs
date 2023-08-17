@@ -44,7 +44,8 @@ public class SettingPanel : MonoBehaviour
     private void Start() 
     {
         OnResolutionChange();
-        Title_Address.text = "WS Address: " + WSConnection.getInstance().changeAddress(savedAddress);
+        //Title_Address.text = "WS Address: " + WSConnection.getInstance().changeAddress(savedAddress);
+        Title_Address.text = RestAPI._instance.changeAddress(savedAddress);
     }
 
     public void OnResolutionChange()
@@ -82,6 +83,6 @@ public class SettingPanel : MonoBehaviour
         }
         savedAddress = currentAddress;
         UserData.SaveServerAddress(savedAddress);
-        Title_Address.text = "WS Address: " + WSConnection.getInstance().changeAddress(savedAddress, true);
+        Title_Address.text = RestAPI._instance.changeAddress(savedAddress);
     }
 }

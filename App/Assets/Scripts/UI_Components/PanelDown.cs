@@ -128,26 +128,26 @@ public class PanelDown : MonoBehaviour
         {
             case FeatureList.BuiltInPhoto:
                 ShowEditMode(false, true);
-                RestFullAPI._instance.setResultDisplay();
+                RestAPI._instance.setResultDisplay();
                 BuiltInCameraFunctions.getInstance().clickAccessCamera();
                 //WSConnection.getInstance().setTargetPos();
                 break;
             
             case FeatureList.RealtimeRender:
                 ShowEditMode(false, true);
-                RestFullAPI._instance.setResultDisplay();
+                RestAPI._instance.setResultDisplay();
                 break;
 
             case FeatureList.NativePhoto:
                 ShowEditMode(false, true);
-                RestFullAPI._instance.setResultDisplay();
+                RestAPI._instance.setResultDisplay();
                 BuiltInCameraFunctions.getInstance().ImageScript.hideTexture();
                 //WSConnection.getInstance().setTargetPos();
                 break;
 
             case FeatureList.NativeRecord:
                 ShowEditMode(false, true);
-                RestFullAPI._instance.setResultDisplay();
+                RestAPI._instance.setResultDisplay();
                 BuiltInCameraFunctions.getInstance().ImageScript.hideTexture();
                 //WSConnection.getInstance().setTargetPos();
                 break;

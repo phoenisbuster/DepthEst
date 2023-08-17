@@ -130,7 +130,7 @@ public class NativeFunctions : MonoBehaviour
                                                                                                 success + " at " +
                                                                                                 path 
                                                                         );
-                                                                        RestFullAPI.TestAPI(bytes);
+                                                                        RestAPI.TestAPI(bytes);
                                                                     }
         );
         Destroy(texture, 5f);  
@@ -159,7 +159,7 @@ public class NativeFunctions : MonoBehaviour
                 byte[] bytes = texture.EncodeToPNG();
                 
                 //WSConnection.getInstance().setTextureData(texture.EncodeToPNG());
-                RestFullAPI.TestAPI(bytes);
+                RestAPI.TestAPI(bytes);
                 Destroy(texture, 5f);
             }
             else
